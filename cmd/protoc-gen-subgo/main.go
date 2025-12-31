@@ -1,7 +1,10 @@
 package main
 
 import (
+	"fmt"
+
 	"google.golang.org/protobuf/compiler/protogen"
+	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 func main() {
@@ -26,7 +29,27 @@ func main() {
 
 func processMessage(g *protogen.GeneratedFile, m *protogen.Message) error {
 	g.P("type ", m.GoIdent, " struct {")
+	for _, f := range m.Fields {
+		ty, err := goTypeName(f)
+		if err != nil {
+			return err
+		}
+		g.P(f.GoName, " ", ty)
+	}
 	g.P("}")
 
 	return nil
+}
+
+func goTypeName(f *protogen.Field) (string, error) {
+	switch k := f.Desc.Kind(); k {
+	case protoreflect.Int32Kind:
+		return "int32", nil
+	case protoreflect.StringKind:
+		return "string", nil
+	case protoreflect.MessageKind:
+		return f.Message.GoIdent.GoName, nil
+	default:
+		return "", fmt.Errorf("未対応の Field: %s %v", f.GoName, k)
+	}
 }
