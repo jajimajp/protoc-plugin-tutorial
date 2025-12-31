@@ -38,6 +38,26 @@ func processMessage(g *protogen.GeneratedFile, m *protogen.Message) error {
 	}
 	g.P("}")
 
+	g.P("func (m ", m.GoIdent, ") PrintYAML(indentSpaces int) {")
+	printfIdent := protogen.GoIdent{
+		GoName:       "Printf",
+		GoImportPath: protogen.GoImportPath("fmt"),
+	}
+	repIdent := protogen.GoIdent{
+		GoName:       "Repeat",
+		GoImportPath: protogen.GoImportPath("strings"),
+	}
+	g.P("indent := ", repIdent, `(" ", indentSpaces)`)
+	for _, f := range m.Fields {
+		if f.Desc.Kind() == protoreflect.MessageKind {
+			g.P(printfIdent, `("%s`, f.GoName, `: \n", indent)`)
+			g.P("m.", f.GoName, ".PrintYAML(indentSpaces + 2)")
+			continue
+		}
+		g.P(printfIdent, `("%s`, f.GoName, `: %v\n", indent, m.`, f.GoName, `)`)
+	}
+	g.P("}")
+
 	return nil
 }
 

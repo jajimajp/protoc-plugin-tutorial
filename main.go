@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	proto "github.com/jajimajp/protoc-plugin-tutorial/protobuf/go"
 )
 
@@ -14,5 +12,6 @@ func main() {
 			Name: "FooBarCorp",
 		},
 	}
-	fmt.Printf("%v\n", p)
+
+	p.PrintYAML(0)
 }
